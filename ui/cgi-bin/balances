@@ -1,0 +1,128 @@
+#!/home/skull/nodejs/bin/node
+
+const fs = require( 'fs' )
+const wss = require( 'ws' )
+const ecjson = require( './ecjsonrpc.js' )
+
+// const WSURL = 'ws://10.0.0.113:8888'
+const WSURL = 'ws://70.66.248.196:8888'
+
+const privkeyhex =
+  "a5747ee45a25ddcd919f8d8109c2de5286c007e1a05fa0680e9e37957cb7faa9"
+
+function timestamp() {
+  let now = new Date()
+  let mon = now.getUTCMonth() + 1
+  if (mon < 10) mon = '0' + mon
+  let day = now.getUTCDate()
+  if (day < 10) day = '0' + day
+  let hr = now.getUTCHours()
+  if (hr < 10) hr = '0' + hr
+  let min = now.getUTCMinutes()
+  if (min < 10) min = '0' + min
+  return '' + now.getUTCFullYear() + mon + day + ':' + hr + min
+}
+
+var mylog = fs.createWriteStream( 'balances.txt', {flags: 'a'} )
+function log( estr ) {
+  mylog.write( timestamp() + ' ' + estr + '\n' )
+  console.log( estr )
+}
+
+function balancesOf( addrs ) {
+  console.log( 'balances of: ' + JSON.stringify(addrs) )
+
+  let ws = new wss.WebSocket( WSURL )
+
+  ws.on( 'error', log )
+  ws.on( 'message', msgdata => {
+    let obj
+    try {
+      obj = JSON.parse( msgdata.toString() )
+
+      if (obj.method === "hello") {
+        let gwpubkeyhex = obj.params[0]
+
+        let balreq = JSON.parse( JSON.stringify(ecjson.REQUEST) )
+        balreq.method = "eth.balances"
+        balreq.params = addrs
+        balreq.id = process.pid
+
+        log( 'red request: ' + JSON.stringify(balreq) )
+
+        let blackreq = ecjson.redToBlack( privkeyhex, gwpubkeyhex, balreq )
+        ws.send( JSON.stringify(blackreq) )
+      }
+      else if (obj.error) {
+        throw JSON.stringify( obj.error )
+      }
+      else if (obj.msghex) {
+        let redobj = ecjson.blackToRed( privkeyhex, obj )
+        if (redobj.error)
+          throw JSON.stringify( redobj.error )
+        let rspobj = { result: redobj.result }
+        console.log( "Content-Type: application/json\r\n\r\n" )
+        console.log( JSON.stringify(rspobj) )
+        ws.close()
+      }
+      else {
+        throw 'unrecognized response: ' + msgdata.toString()
+      }
+    }
+    catch( ex ) {
+      log( ex.toString() )
+      let errobj = { error: { code: 500, message: ex.toString() } }
+      console.log( "Content-Type: application/json\r\n\r\n" )
+      console.log( JSON.stringify(errobj) )
+      ws.close()
+    }
+  } )
+}
+
+function handleGet() {
+  let param = process.env.QUERY_STRING.split('=')
+  if (!param || param.length != 2 || param[0] !== 'addresses')
+    throw 'GET: QUERY_STRING missing addresses parameter'
+
+  console.log( 'param[1]: ' + param[1] )
+
+  let addresses = JSON.parse( param[1] )
+  if (!addresses || !addresses.length)
+    throw 'GET: QUERY_STRING missing comma-separated address list'
+
+  balancesOf( addresses )
+}
+
+function handlePost() {
+  let contentlength = process.env.CONTENT_LENGTH
+
+  process.stdin.on('data', data => {
+    let body = JSON.parse( data.toString() )
+    if (!body || body.length == 0) throw 'POST: expected addresses'
+    balancesOf( body )
+  });
+}
+
+// =====
+//  MAIN
+// =====
+
+try {
+  log( process.env.REMOTE_ADDR )
+
+  if (process.env.REQUEST_METHOD === 'GET') {
+    handleGet()
+  }
+  else
+  if (process.env.REQUEST_METHOD === 'POST') {
+    handlePost()
+  }
+  else
+    throw "unrecognized REQUEST_METHOD: " + process.env.REQUEST_METHOD
+}
+catch( ex ) {
+  log( ex.toString() )
+  let errrsp = { error: { code: 500, message: ex.toString() } }
+  console.log( "Content-Type: application/json\r\n\r\n" )
+  console.log( JSON.stringify(errrsp) )
+}

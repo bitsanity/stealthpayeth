@@ -1,0 +1,646 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Ethereum Stealth Payment Calculator</title>
+  <meta charset="UTF-8"/>
+  <link id="PageSkin" rel="stylesheet" type="text/css" href="skins/plain.css"/>
+  <script src="skins/skins.js"></script>
+  <script src="languages/labels.js"></script>
+  <script src="languages/english.js"></script>
+
+  <script src="libs/pubsub.js"></script>
+  <script src="libs/jquery.min.js"></script>
+  <script src="libs/blsecp256k1.browserify.js"></script>
+  <script src="libs/elliptic.browserify.js"></script>
+  <script src="libs/jssha3.min.js"></script>
+  <script src="libs/qrcode.min.js"></script>
+</head>
+
+<body>
+<center>
+
+<!-- ====================================================================== -->
+<div id=Header>
+<img src=images/stealth.svg width=100 height=50>&nbsp;
+  <span class=Title id=AppTitle></span>
+</div>
+<!-- ====================================================================== -->
+
+<p>&nbsp;</p>
+<span class=warndiv>
+<span class=label>WARNING</span>: NO WARRANTY. EXPERIMENTAL USE ONLY
+</span>
+<p>&nbsp;</p>
+
+<!-- ====================================================================== -->
+<div id=HideableDivs>
+
+<!-- ====================================================================== -->
+<div id=ModeSelectDialog>
+<table>
+<tr>
+<td>&nbsp;</td>
+</tr>
+
+<tr>
+<td align=right>
+  <input type=image src=images/receiver.svg width=50 height=50
+         onclick="PubSub.publish('AmReceiver')" />
+</td>
+<td>
+  <span id=AmReceiverLabel></span>
+</td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+<td align=right>
+  <input type=image src=images/sender.svg width=50 height=50
+         onclick="PubSub.publish('AmSender')" />
+</td>
+<td>
+  <span id=AmSenderLabel></span>
+</td>
+</tr>
+<tr>
+  <td>&nbsp;</td>
+</tr>
+<tr>
+<td align=right>
+  <input type=image src=images/checkincoming.svg width=50 height=50
+         onclick="PubSub.publish('CheckIncoming')" />
+</td>
+<td>
+  <span id=CheckIncomingLabel></span>
+</td>
+</tr>
+</table>
+</div> <!-- ModeSelectDialog -->
+<!-- ====================================================================== -->
+<div id=PrepareToReceiveDialog>
+<table>
+<tr>
+<td align=right>
+<img src=images/backbtn.svg width=40 height=40
+     onclick="PubSub.publish('BackFromReceive')" />
+<td align=left><span id=BackLabel1></span></td>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+  <td align=right><img src=images/randomgen.svg width=50 height=50
+           onclick="PubSub.publish('GenerateSpendingKey')" ></img>
+  <td><span>:&nbsp;</span><span id=GenSpendKeyLabel></span>
+  </td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align=right><span id=StealthKeyLabel class=label></span></td>
+<td>
+<input id="StealthKeyField" class=reddata type=text
+       size=64 maxlength=64 readonly />
+</td>
+<td>
+<img src=images/copy.svg width=20 height=20
+     onclick="PubSub.publish('CopyReceiverStealthKey')" />
+</td>
+</tr>
+<tr>
+<td/>
+<td><img src=images/uparrow.svg width=20 height=25></img>&nbsp;
+    <span class=smalltxt id=RootSpendKeySaveLabel></span>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align=right><span id=StealthAddressLabel class=label></span></td>
+<td>
+<input id="StealthAddressField" class=blackdata type=text
+       size=66 maxlength=66 readonly />
+</td>
+<td>
+<img src=images/copy.svg width=20 height=20
+     onclick="PubSub.publish('CopyReceiverStealthAddress')" />
+</td>
+</tr>
+<tr>
+<td/>
+<td>
+<span id=RxStealthAddrQR></span>
+</td>
+</tr>
+<tr>
+<td/>
+<td><img src=images/uparrow.svg width=20 height=25></img>&nbsp;
+    <span class=smalltxt id=StealthAddrShareLabel></span>
+</td>
+</tr>
+</table>
+</div> <!-- PrepareToReceiveDialog -->
+<!-- ====================================================================== -->
+<div id=PrepareToSendDialog>
+<table>
+<tr>
+<td align=right>
+<img src=images/backbtn.svg width=40 height=40
+     onclick="PubSub.publish('BackFromSend')" />
+<td align=left><span id=BackLabel2></span></td>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align=right><span id=RxStealthMetaAddressLabel class=label></span></td>
+<td>
+<input id="RxStealthMetaAddressField" class=blackdata type=text
+       size=66 maxlength=66 />
+</td>
+</tr>
+<tr>
+<td/>
+<td><img src=images/uparrow.svg width=20 height=25></img>&nbsp;
+    <span class=smalltxt id=EnterReceiverStealthAddrLabel></span>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align=right><img src=images/geneph.svg width=50 height=50
+         onclick="PubSub.publish('GenerateEphemeralKey')" ></img>
+</td>
+<td colspan=2><span id=GenerateEphKeyLabel></span></td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td class="label" align=right><span id="EphPublicKeyLabel"></span></td>
+<td>
+<input id="EphPublicKeyField" class="blackdata rdonly" type=text
+       size=66 maxlength=66 readonly />
+</td>
+<td>
+<img src=images/copy.svg width=20 height=20
+     onclick="PubSub.publish('CopyEphemeralPubkey')" />
+</td>
+</tr>
+<tr>
+<td/>
+<td><img src=images/uparrow.svg width=20 height=25></img>&nbsp;
+    <span class=smalltxt id=PostEphPubkeyLabel></span>
+</td>
+</tr>
+<tr>
+<td>&nbsp;</td>
+</tr>
+<tr>
+<td align=right><span id=AssetAddressLabel class=label></span></td>
+<td>
+<input id="AssetAddressField" class="blackdata rdonly" type=text
+       size=42 maxlength=42 readonly />
+</td>
+<td>
+<img src=images/copy.svg width=20 height=20
+     onclick="PubSub.publish('CopyAssetAddress')" />
+</td>
+</tr>
+<tr>
+<td/>
+<td>
+<span id=AssetAddressQR></span>
+</td>
+</tr>
+<tr>
+<td/>
+<td><img src=images/uparrow.svg width=20 height=25></img>&nbsp;
+<span class=smalltxt id=SendFundsToLabel></span>
+</td>
+</tr>
+</table>
+</div> <!-- PrepareToSendDialog -->
+<!-- ====================================================================== -->
+<div id=ScanForIncomingDialog>
+<table>
+<tr>
+<td align=right>
+<img src=images/backbtn.svg width=40 height=40
+     onclick="PubSub.publish('BackFromScan')" />
+<td align=left><span id=BackLabel3></span></td>
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td align=right><span id=ScanRxRootSpendKeyLabel class=label></span></td>
+<td>
+<input id="ScanRxRootSpendKeyField" class=reddata type=password
+       size=64 maxlength=64 />
+</td>
+</tr>
+<tr>
+<td/>
+<td><img src=images/uparrow.svg width=20 height=25></img>&nbsp;
+    <span class=smalltxt id=EnterYourRootSpendKeyLabel></span>
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td align=right><span id=EphKeyRegistryLabel class=label></span></td>
+<td>
+<input id="EphKeyRegistryField" class="blackdata rdonly" type=text
+       size=42 maxlength=42 readonly />
+</td>
+</tr>
+<tr>
+<td/>
+<td><img src=images/uparrow.svg width=20 height=25></img>&nbsp;
+    <span class=smalltxt id=EnterEphKeyRegSCALabel></span>
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td align=right><span id=StartScanDateLabel class=label></span></td>
+<td>
+  DD (1-31): <input id=StartScanDD type=text size=2 maxlength=2></input>&nbsp;
+  MM (1-12): <input id=StartScanMM type=text size=2 maxlength=2></input>&nbsp;
+  YYYY: <input id=StartScanYYYY type=text size=4 maxlength=4></input>&nbsp;
+  <img src=images/reset.svg width=15 height=15
+       onclick="PubSub.publish('ResetStartDate')">
+</td>
+</tr>
+<tr>
+<td/>
+<td><img src=images/uparrow.svg width=20 height=25></img>&nbsp;
+    <span class=smalltxt id=EnterScanStartLabel></span>
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td align=right>
+<img id=ScanButton src=images/radar.svg width=50 height=50
+     onclick="PubSub.publish('ScanForPayments')" />
+</td>
+<td align=left><span id=ScanForPaymentsLabel></span></td>
+</td>
+</tr>
+<tr><td>&nbsp;</td></tr>
+<tr>
+<td align=right valign=top class=label><span id=ScanResultsLabel></span></td>
+</tr>
+<tr>
+<td colspan=2><div id=ScanResults></div></td>
+</table>
+</div>
+<!-- ====================================================================== -->
+</div> <!-- HideableDivs -->
+
+<p>&nbsp;</>
+<p>&nbsp;</>
+
+<div id=Footer>
+<table>
+<tr>
+<td>
+  <img src=images/info.svg width=50 height=50
+       onclick="PubSub.publish('GeneralInfoRequested')" />
+</td>
+<td>
+  <span id=RequestInfo></span>
+</td>
+<td>&nbsp;</td>
+<td><img src=images/help.svg width=50 height=50
+      onclick="PubSub.publish('GeneralHelpRequested')" />
+</td>
+<td>
+<span id=RequestHelp></span>
+</td>
+<td>&nbsp;</td>
+<td><img src=images/safety.svg width=50 height=50
+      onclick="PubSub.publish('GeneralSafetyRequested')" />
+</td>
+<td>
+<span id=RequestSafety></span>
+</td>
+
+</tr>
+</div>
+
+</center>
+
+<script type="text/javascript">
+  const EC = require('elliptic').ec
+  const ec = new EC('secp256k1')
+  const sha3 = require( 'js-sha3' )
+  const ecc = require( '@bitcoinerlab/secp256k1' )
+
+  const SCANURL = '/cgi-bin/epkscan'
+  const BALCURL = '/cgi-bin/balances'
+  const CGIPOSTTEMPLATE = {
+    method: "POST",
+    mode: "cors",
+    cache: "no-cache",
+    credentials: "same-origin",
+    headers: { "Content-Type": "application/json" },
+    redirect: "follow",
+    referrerPolicy: "no-referrer",
+    body: ""
+  }
+
+  LABELS.setLabels()
+  SKINS.setSkin( "plain" )
+
+  $("#PrepareToReceiveDialog").hide()
+  $("#PrepareToSendDialog").hide()
+  $("#ScanForIncomingDialog").hide()
+  $("#EphKeyRegistryField").val( "0xadd556918186b073eb51fea466e742f53f3defe5" )
+
+  function hexToBytes(hex) {
+    let bytes = [];
+    for (let c = 0; c < hex.length; c += 2)
+      bytes.push(parseInt(hex.substr(c, 2), 16));
+    return bytes;
+  }
+
+  function bytesToHex(bytes) {
+    let hex = [];
+    for (let i = 0; i < bytes.length; i++) {
+      let current = bytes[i] < 0 ? bytes[i] + 256 : bytes[i];
+      hex.push((current >>> 4).toString(16));
+      hex.push((current & 0xF).toString(16));
+    }
+    return hex.join("");
+  }
+
+  function pubkeyToAddress( pubkey ) {
+    // omit leading 04 on purpose
+    let keyhex = pubkey.getX().toString('hex') +
+                 pubkey.getY().toString('hex')
+
+    let keybytes = hexToBytes( keyhex )
+    let hash = sha3.keccak256( keybytes )
+    return hash.substring(24) // last twenty bytes two chars per byte
+  }
+
+  async function checkEPKs( epkarr ) {
+    let srrskf = $("#ScanRxRootSpendKeyField").val()
+    let m = hexToBytes( srrskf )
+    let rootSpendKP = ec.keyFromPrivate( m )
+
+    let tableStr = "<table>" +
+      "<tr><th class=smalltxt>Address</th>" +
+      "<th class=smalltxt>Balance (wei)</th>" +
+      "<th class=smalltxt>Private Key</th></tr>"
+
+    for (let ii = 0; ii < epkarr.length; ii++) {
+      // S = m * R
+      let R_pt = ec.keyFromPublic( epkarr[ii].replace('0x',''), 'hex' )
+      let rhs = rootSpendKP.derive( R_pt.getPublic() ).toString( 16 )
+      let Sx32 = hexToBytes( rhs )
+
+      // p = m + hash(S)
+      let hashS = sha3.keccak256( Sx32 )
+      let p = ecc.privateAdd(
+        Uint8Array.from(m),
+        Uint8Array.from( hexToBytes(hashS) )
+      )
+
+      let pkey = ec.keyFromPrivate( p )
+      let A = pubkeyToAddress( pkey.getPublic() )
+
+      let post = JSON.parse( JSON.stringify(CGIPOSTTEMPLATE) ) // clone template
+      post.body = JSON.stringify( [A] )
+
+      let response = await fetch( BALCURL, post )
+      let balresp = await response.json()
+      if (    balresp
+           && balresp.result
+           && BigInt(balresp.result[0].balance) > 0n ) {
+
+        tableStr +='<tr>' +
+          '<td class=smalltxt>' + balresp.result[0].address + '</td>' +
+          '<td class=smalltxt>' + balresp.result[0].balance + '</td>' +
+          '<td class="hiddentxt smalltxt">' + bytesToHex(p) + '</td></tr>'
+      }
+    }
+
+    tableStr += "</table>"
+    $( "#ScanResults" ).append( tableStr )
+  }
+
+  async function doScan( timestamp ) {
+    $( "#ScanResults" ).empty()
+    $("#ScanButton").attr( 'hidden', true )
+
+    let post = JSON.parse( JSON.stringify(CGIPOSTTEMPLATE) ) // clone template
+    post.body = JSON.stringify( { starttimestamp: timestamp } )
+    let response = await fetch( SCANURL, post )
+    let epkresp = await response.json()
+
+    $("#ScanButton").removeAttr( 'hidden' ) // better than setting to false
+
+    if (epkresp && epkresp.result) {
+      if (epkresp.result.length == 0)
+        $("#ScanResults").append(
+          "<table width=100%><tr><td align=center>none</th></tr></table>" )
+      else
+        checkEPKs( epkresp.result )
+    }
+  }
+
+  PubSub.subscribe( 'AmReceiver', () => {
+    $("#ModeSelectDialog").hide()
+
+    $("#StealthKeyField").val( "" )
+    $("#StealthAddressField").val( "" )
+    $( "#RxStealthAddrQR" ).empty()
+
+    $("#PrepareToReceiveDialog").show()
+  } )
+
+  PubSub.subscribe( 'AmSender', () => {
+    $("#ModeSelectDialog").hide()
+    $("#PrepareToSendDialog").show()
+
+    $( "#RxStealthMetaAddressField" ).val( "" )
+    $( "#EphPublicKeyField" ).val( "" )
+    $( "#AssetAddressField" ).val( "" )
+    $( "#AssetAddressQR" ).empty()
+  } )
+
+  PubSub.subscribe( 'CheckIncoming', () => {
+    $("#ModeSelectDialog").hide()
+    $("#ScanForIncomingDialog").show()
+
+    $("#ScanRxRootSpendKeyField").val("")
+    PubSub.publish( 'ResetStartDate' )
+    $("#ScanButton").removeAttr( 'hidden' )
+    $( "#ScanResults" ).empty()
+  } )
+
+  PubSub.subscribe( 'BackFromReceive', () => {
+    let keyval = $("#StealthKeyField").val()
+
+    if (keyval && keyval.length > 0) {
+      if (!confirm(STRINGS[LANG].RxSaveStealthKeyWarning))
+        return
+    }
+
+    $("#PrepareToReceiveDialog").hide()
+    $("#ModeSelectDialog").show()
+  } )
+
+  PubSub.subscribe( 'BackFromScan', () => {
+    $("#ScanForIncomingDialog").hide()
+    $("#ModeSelectDialog").show()
+  } )
+
+  PubSub.subscribe( 'BackFromSend', () => {
+    let rval = $( "#EphPublicKeyField" ).val()
+    if (rval && rval.length > 0) {
+      if (!confirm(STRINGS[LANG].SenderRWarning))
+        return
+    }
+
+    $("#PrepareToSendDialog").hide()
+    $("#ModeSelectDialog").show()
+  } )
+
+  PubSub.subscribe( 'GeneralInfoRequested', () => {
+    alert( STRINGS[LANG].GeneralInfo )
+  } )
+
+  PubSub.subscribe( 'GeneralHelpRequested', () => {
+    alert( STRINGS[LANG].GeneralHelp )
+  } )
+
+  PubSub.subscribe( 'GeneralSafetyRequested', () => {
+    alert( STRINGS[LANG].GeneralSafety )
+  } )
+
+  PubSub.subscribe('GenerateSpendingKey', () => {
+    var key = ec.genKeyPair()
+    $("#StealthKeyField").val( key.getPrivate('hex') )
+
+    let sma = key.getPublic( true, 'hex' )
+    $("#StealthAddressField").val( sma )
+    let qrcode = new QRCode( "RxStealthAddrQR", {
+      text: sma,
+      width: 400,
+      height: 400,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    } );
+  } )
+
+  PubSub.subscribe( 'CopyReceiverStealthKey', () => {
+    let txt = $( "#StealthKeyField" ).val()
+    if (txt && txt.length > 0) {
+      navigator.clipboard.writeText(txt)
+      alert( STRINGS[LANG].CopiedOk )
+    }
+  } )
+
+  PubSub.subscribe( 'CopyReceiverStealthAddress', () => {
+    let txt = $( "#StealthAddressField" ).val()
+    if (txt && txt.length > 0) {
+      navigator.clipboard.writeText(txt)
+      alert( STRINGS[LANG].CopiedOk )
+    }
+  } )
+
+  PubSub.subscribe( 'GenerateEphemeralKey', () => {
+    let M_hex = $( "#RxStealthMetaAddressField" ).val()
+
+    if (!M_hex || !/0[23][0-9a-fA-F]{64}/.test(M_hex)) {
+      alert( STRINGS[LANG].NeedRxStealthMetaAddr )
+      return
+    }
+
+    // (r, R)
+    let ephemeral = ec.genKeyPair()
+    $( "#EphPublicKeyField" ).val( ephemeral.getPublic(true,'hex') )
+
+    let M_pt = ec.keyFromPublic( M_hex, 'hex' )
+
+    // S = r * M
+    let rhs = ephemeral.derive( M_pt.getPublic(false) )
+    let Sx32 = hexToBytes( rhs.toString(16) )
+    let hashS = sha3.keccak256( Sx32 )
+
+    // P = M + G * hash(S)
+    let hashpoint = ec.keyFromPrivate( hashS )
+    let apub = M_pt.getPublic(true).add( hashpoint.getPublic(true) )
+
+    let aaddr = '0x' + pubkeyToAddress( apub )
+    $( "#AssetAddressField" ).val( aaddr )
+    let qrcode = new QRCode( "AssetAddressQR", {
+      text: aaddr,
+      width: 400,
+      height: 400,
+      colorDark: "#000000",
+      colorLight: "#ffffff",
+      correctLevel: QRCode.CorrectLevel.H
+    } )
+  } )
+
+  PubSub.subscribe( 'CopyEphemeralPubkey', () => {
+    let txt = $( "#EphPublicKeyField" ).val()
+    if (txt && txt.length > 0) {
+      navigator.clipboard.writeText(txt)
+      alert( STRINGS[LANG].CopiedOk )
+    }
+  } )
+
+  PubSub.subscribe( 'CopyAssetAddress', () => {
+    let txt = $( "#AssetAddressField" ).val()
+    if (txt && txt.length > 0) {
+      navigator.clipboard.writeText(txt)
+      alert( STRINGS[LANG].CopiedOk )
+    }
+  } )
+
+  PubSub.subscribe('ResetStartDate', () => {
+    let dt = new Date()
+    dt.setUTCMonth( dt.getUTCMonth() - 1 )
+
+    let dd = '' + dt.getUTCDate()
+    while (dd.length < 2) dd = '0' + dd
+    let mm = '' + (dt.getUTCMonth() + 1)
+    while (mm.length < 2) mm = '0' + mm
+    let yyyy = '' + dt.getUTCFullYear()
+    $( "#StartScanDD" ).val( dd )
+    $( "#StartScanMM" ).val( mm )
+    $( "#StartScanYYYY" ).val( yyyy )
+  } )
+
+  PubSub.subscribe('ScanForPayments', () => {
+    let srrskf = $("#ScanRxRootSpendKeyField").val()
+    if (!srrskf || srrskf.length != 64) {
+      alert( STRINGS[LANG].InvalidRootSpendKey )
+      return
+    }
+
+    let starttimestamp = new Date()
+    starttimestamp.setUTCDate( parseInt($("#StartScanDD").val()) )
+    starttimestamp.setUTCMonth( parseInt($("#StartScanMM").val()) )
+    starttimestamp.setUTCFullYear( parseInt($("#StartScanYYYY").val()) )
+    starttimestamp.setUTCHours( 0 )
+    starttimestamp.setUTCMinutes( 0 )
+    starttimestamp.setUTCSeconds( 0 )
+    starttimestamp.setUTCMilliseconds( 0 )
+
+    doScan( starttimestamp.getTime() )
+  } )
+
+</script>
+
+</body>
+</html>

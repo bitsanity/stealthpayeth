@@ -1,0 +1,81 @@
+body {
+  background-color: white;
+  font-size: 20px;
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+table {
+  border-spacing: 3px;
+}
+
+td {
+  padding: 3px;
+}
+
+th {
+  background-color:lightblue;
+}
+
+canvas {
+  background-color:white;
+  border: black 3px solid;
+}
+
+.smalltxt {
+  font-size:8px;
+}
+
+.hiddentxt {
+  background-color:white;
+  color:white;
+}
+
+.warndiv {
+  border: red 3px solid;
+  border-radius: 20px;
+  padding: 20px;
+}
+
+.Title {
+  font-weight: bold;
+  font-size: 50px;
+}
+
+.label {
+  font-weight: bold;
+}
+
+.reddata {
+  font-family: monospace;
+  color: red;
+}
+
+.blackdata {
+  font-family: monospace;
+  color: black;
+}
+
+.rdonly {
+  color: darkgreen;
+  background-color:lightgrey;
+}
+
+.units {
+  font-style: italic;
+  font-size: 12px;
+}
+
+.highlighted {
+  background-color: yellow;
+}
+
+.okbutton {
+  font-weight: bold;
+  color : green;
+}
+
+.cancelbutton {
+  font-weight: bold;
+  color : red;
+}
+

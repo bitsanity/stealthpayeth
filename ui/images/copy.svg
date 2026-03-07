@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Uploaded to: SVG Repo, www.svgrepo.com, Generator: SVG Repo Mixer Tools -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="800px"
+   height="800px"
+   viewBox="0 0 24 24"
+   fill="none"
+   version="1.1"
+   id="svg859"
+   sodipodi:docname="copy.svg"
+   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+  <metadata
+     id="metadata865">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <defs
+     id="defs863" />
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="640"
+     inkscape:window-height="480"
+     id="namedview861"
+     showgrid="false"
+     inkscape:zoom="1.3475"
+     inkscape:cx="400"
+     inkscape:cy="400"
+     inkscape:current-layer="svg859" />
+  <g
+     id="g874">
+    <path
+       style="stroke:#000000;stroke-width:1.7007874;stroke-linecap:round;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0"
+       d="M 17.8333,18 C 20.1345,18 22,16.0972 22,13.75 V 5.25 C 22,2.90279 20.1345,1 17.8333,1 H 11.1667 C 8.86548,1 7,2.90279 7,5.25"
+       id="rec" />
+    <path
+       style="stroke:#000000;stroke-width:1.7007874;stroke-miterlimit:4;stroke-dasharray:none"
+       inkscape:connector-curvature="0"
+       d="M 2,10.25 C 2,7.90279 3.86548,6 6.16667,6 H 12.8333 C 15.1345,6 17,7.90279 17,10.25 v 8.5 C 17,21.0972 15.1345,23 12.8333,23 H 6.16667 C 3.86548,23 2,21.0972 2,18.75 Z"
+       id="rec_2" />
+  </g>
+</svg>
