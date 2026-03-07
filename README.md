@@ -1,8 +1,8 @@
 ## Ethereum Stealth Payments
 
 "Stealth Payments" are payments that enable senders and receivers to pay ether
-in a way that protects both parties from snooping on eachother and deters
-blockchain analysis from linking them.
+in a way that protects both parties from snooping on one another and deters
+blockchain analysis.
 
 
 This project includes:
