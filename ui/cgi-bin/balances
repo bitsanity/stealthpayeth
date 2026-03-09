@@ -4,11 +4,9 @@ const fs = require( 'fs' )
 const wss = require( 'ws' )
 const ecjson = require( './ecjsonrpc.js' )
 
-// const WSURL = 'ws://10.0.0.113:8888'
-const WSURL = 'ws://70.66.248.196:8888'
+const WSURL = 'ws://127.0.0.1:8546'
 
-const privkeyhex =
-  "a5747ee45a25ddcd919f8d8109c2de5286c007e1a05fa0680e9e37957cb7faa9"
+const privkeyhex = "hex..."
 
 function timestamp() {
   let now = new Date()

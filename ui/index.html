@@ -567,6 +567,7 @@
     // (r, R)
     let ephemeral = ec.genKeyPair()
     $( "#EphPublicKeyField" ).val( ephemeral.getPublic(true,'hex') )
+    console.log( 'r: ' + ephemeral.getPrivate('hex') )
 
     let M_pt = ec.keyFromPublic( M_hex, 'hex' )
 

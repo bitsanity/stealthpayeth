@@ -6,7 +6,7 @@ const { Web3 } = require('web3')
 const web3 = new Web3('ws://10.0.0.113:8546')
 //const web3 = new Web3('ws://localhost:8545')
 
-const MYGASPRICE = '' + 23 * 1e9;
+const MYGASPRICE = '' + 1 * 1e9; // should be fetched
 
 function getABI() {
   return JSON.parse( fs.readFileSync(

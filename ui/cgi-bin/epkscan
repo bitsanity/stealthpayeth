@@ -7,11 +7,9 @@ const fs = require( 'fs' )
 const wss = require( 'ws' )
 const ecjson = require( './ecjsonrpc.js' )
 
-// const WSURL = 'ws://10.0.0.113:8888'
-const WSURL = 'ws://70.66.248.196:8888'
+const WSURL = 'ws://127.0.0.69:8546'
 
-const privkeyhex =
-  "ed799fbaa3ee5ec823155c744523c4ac1cc1ac5bb1b8c85d5f884cb1c07e5138"
+const privkeyhex = "hex..."
 
 var mylog = fs.createWriteStream( './epkscan.txt', {flags:'a'} )
 

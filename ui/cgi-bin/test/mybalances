@@ -1,24 +1,21 @@
 #!/bin/bash
 
 export REQUEST_METHOD="GET"
-export QUERY_STRING="addresses=0x8e9342eb769c4039aaf33da739fb2fc8af9afdc1"
+export QUERY_STRING="addresses=0x..."
 
-#./balance
+# ./balance
 
-export QUERY_STRING="addresses=0xb6536c3b131117ac2c1016a8a2e893e842750265,0x92773ef425b1d6c3464606d39f36dbfedacc6935"
+export QUERY_STRING="addresses=0x...,0x..."
 
-#./balance
+# ./balance
 
 export REQUEST_METHOD="POST"
 
 #./balance <<< '["0x43133b094c9d78BBB7030f9bABF48C056905d529"]'
 
 ./balance <<EOI
-["0xa92ac8ed0e3ac80e193af1a3d04c64889f06535e",
- "0xda4cb6fb7bab40cd3a388cdb348d408f2e2c53b4",
- "0x0975eb8faeb3ed07e9fa34be3783a52664fecbe0",
- "0x00bef7d5071e36e824f75cbae2b0b8e3acff7556",
- "0x258b75ec103c1b4bfdf5f2f40a9e2733703b4a5a",
- "0x650e41cce68dc9ae81de225b5142569ffff95ec2",
- "0x87F47068C79154b9def55F95E073dA9dD9757a70"]
+["0x...",
+ "0x...",
+ "0x...",
+ "0x..."]
 EOI
