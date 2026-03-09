@@ -74,7 +74,7 @@ let stealthsend = STEALTHPAY.createStealthSend( M )
 // - the sender may send to A from some other account the sender controls
 // - we don't want to know private keys for the sender if we can help it
 //
-// returns array: [ unsignedregistertx, unsignedsendtxn }
+// returns array: [ unsignedregistertx, unsignedsendtxn ]
 
 let senderutxns = STEALTHPAY.senderUnsignedTxns( R, A, weitopay )
 
@@ -86,7 +86,7 @@ let senderutxns = STEALTHPAY.senderUnsignedTxns( R, A, weitopay )
 // The payment receiver scans our well-known, public Ephemeral Key Registry
 // smart contract to check for balances and calculates receiving private key(s)
 //
-// Returns an array of objects [{balance: B, prvkey: a},...]
+// Returns an array of objects [{bal: n, a: pvtkeyhex, A: addresshex},...]
 
 let receipts = STEALTHPAY.scanForFunds( m )
 
