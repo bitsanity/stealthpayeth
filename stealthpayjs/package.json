@@ -1,0 +1,30 @@
+{
+  "name": "stealthpayjs",
+  "version": "1.0.0",
+  "description": "library to calculate values sending and receiving Ethereum stealth payments",
+  "main": "index.js",
+  "scripts": {
+    "test": "node test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/bitsanity/stealthpayeth.git"
+  },
+  "keywords": [
+    "ethereum",
+    "stealth",
+    "payment"
+  ],
+  "author": "bitsanity",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/bitsanity/stealthpayeth/issues"
+  },
+  "homepage": "https://github.com/bitsanity/stealthpayeth#readme",
+  "dependencies": {
+    "@bitcoinerlab/secp256k1": "^1.2.0",
+    "elliptic": "^6.6.1",
+    "js-sha3": "^0.9.3",
+    "web3": "^4.16.0"
+  }
+}
